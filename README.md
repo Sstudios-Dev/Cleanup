@@ -55,3 +55,11 @@ You can customize this script by modifying the following parts:
 # Notes
 - Make sure to run the script as an administrator to avoid permission issues when deleting files.
 - Basic error handling is provided to handle potential permission or access denied issues.
+
+# Contributors
+
+Thank you very much for helping in the project ❤
+
+<a href="https://github.com/staFF6773"><img src="https://avatars.githubusercontent.com/u/108166164?v=4" height="128" width="128" /></a>
+<a href="https://github.com/Sstudiosdev"><img src="https://avatars.githubusercontent.com/u/149289426?v=4" height="128" width="128" /></a>
+<a href="https://github.com/StaffV77"><img src="https://avatars.githubusercontent.com/u/107765373?v=4" height="128" width="128" /></a>
