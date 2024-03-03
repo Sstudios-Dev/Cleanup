@@ -1,74 +1,59 @@
 Option Explicit
 
-Dim objFSO, objFolder, objFile, strFolderPath, totalFiles, filesDeleted
+Dim objFSO, totalFiles, filesDeleted
 
-' Current user's folder
-strFolderPath = CreateObject("WScript.Shell").SpecialFolders("Desktop")
-
-' Create FileSystemObject object
 Set objFSO = CreateObject("Scripting.FileSystemObject")
-
-' Initialize counters
 totalFiles = 0
 filesDeleted = 0
 
-' Function to count garbage files in a folder and its subfolders
-Sub CountGarbageFiles(folderPath)
+' Count garbage files
+CountGarbageFiles objFSO.GetSpecialFolder(0) ' 0 represents the Desktop folder
+
+' Call the function to search and delete garbage files
+SearchAndDeleteGarbageFiles objFSO.GetSpecialFolder(0) ' 0 represents the Desktop folder
+
+' Completion message
+WScript.Echo "Garbage files successfully deleted in the user's Desktop folder."
+
+' Release object
+Set objFSO = Nothing
+
+Sub CountGarbageFiles(folder)
     Dim objFolder, objFile
+    On Error Resume Next ' Handle potential permission denied errors
     
-    ' Check if folder exists
-    If objFSO.FolderExists(folderPath) Then
-        ' Get reference to the folder
-        Set objFolder = objFSO.GetFolder(folderPath)
+    If Not folder Is Nothing Then
+        For Each objFolder In folder.SubFolders
+            CountGarbageFiles objFolder
+        Next
         
-        ' Count files in the current folder
-        totalFiles = totalFiles + objFolder.Files.Count
-        
-        ' Traverse all subfolders and recursively call the function
-        For Each objFolder In objFolder.SubFolders
-            CountGarbageFiles objFolder.Path
+        For Each objFile In folder.Files
+            If IsGarbageFile(objFile) Then
+                totalFiles = totalFiles + 1
+            End If
         Next
     End If
 End Sub
 
-' Function to search and delete garbage files in a folder and its subfolders
-Sub SearchAndDeleteGarbageFiles(folderPath)
-    Dim objFolder, objFile, progressBar, i
+Sub SearchAndDeleteGarbageFiles(folder)
+    Dim objFolder, objFile
     
-    ' Check if folder exists
-    If objFSO.FolderExists(folderPath) Then
-        ' Get reference to the folder
-        Set objFolder = objFSO.GetFolder(folderPath)
+    If Not folder Is Nothing Then
+        For Each objFolder In folder.SubFolders
+            SearchAndDeleteGarbageFiles objFolder
+        Next
         
-        ' Traverse all files in the folder and delete those that meet the conditions
-        For Each objFile In objFolder.Files
-            ' Conditions to delete garbage files (you can adjust them according to your needs)
-            If LCase(objFSO.GetExtensionName(objFile.Name)) = "tmp" Or LCase(objFSO.GetExtensionName(objFile.Name)) = "bak" Then
-                ' Show the file being deleted
-                WScript.StdOut.WriteLine "Deleting file: " & objFile.Path
-                ' Delete the file
-                objFile.Delete
+        For Each objFile In folder.Files
+            If IsGarbageFile(objFile) Then
+                objFile.Delete(True) ' Force delete
                 filesDeleted = filesDeleted + 1
             End If
         Next
-        
-        ' Traverse all subfolders and recursively call the function
-        For Each objFolder In objFolder.SubFolders
-            SearchAndDeleteGarbageFiles objFolder.Path
-        Next
     End If
 End Sub
 
-' Count garbage files
-CountGarbageFiles strFolderPath
-
-' Call the function to search and delete garbage files
-SearchAndDeleteGarbageFiles strFolderPath
-
-' Completion message
-WScript.Echo "Garbage files successfully deleted in the user's folder."
-
-' Release objects
-Set objFile = Nothing
-Set objFolder = Nothing
-Set objFSO = Nothing
+Function IsGarbageFile(objFile)
+    Dim extension
+    extension = LCase(objFSO.GetExtensionName(objFile.Path))
+    IsGarbageFile = (extension = "tmp" Or extension = "bak")
+End Function
