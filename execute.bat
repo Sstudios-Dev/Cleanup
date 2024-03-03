@@ -1,4 +1,7 @@
 @echo off
+echo Welcome to the script!
+echo.
+
 set "script_folder=%~dp0\script"
 
 if not exist "%script_folder%" (
@@ -6,7 +9,7 @@ if not exist "%script_folder%" (
     exit /b 1
 )
 
-echo Por favor espere, esto puede tardar un poco.
+echo Please wait, this may take a while.
 echo.
 
 :LOOP
